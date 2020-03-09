@@ -50,6 +50,8 @@ type ConsumerOptions struct {
 	// RedisOptions is how you configure the underlying Redis connection. More
 	// info here: https://godoc.org/github.com/go-redis/redis#Options.
 	RedisOptions *RedisOptions
+	// RedisClient is first
+	RedisClient *redis.Client
 }
 
 // Consumer adds a convenient wrapper around dequeuing and managing concurrency.
@@ -110,16 +112,20 @@ func NewConsumerWithOptions(options *ConsumerOptions) (*Consumer, error) {
 		options.ReclaimInterval = 1 * time.Second
 	}
 
-	r, err := newRedisClient(options.RedisOptions)
-	if err != nil {
-		return nil, errors.Wrap(err, "error creating redis client")
+	var err error
+
+	if options.RedisClient == nil {
+		options.RedisClient, err = newRedisClient(options.RedisOptions)
+		if err != nil {
+			return nil, errors.Wrap(err, "error creating redis client")
+		}
 	}
 
 	return &Consumer{
 		Errors: make(chan error),
 
 		options: options,
-		redis:   r,
+		redis:   options.RedisClient,
 		funcs:   map[string]ConsumerFunc{},
 		streams: make([]string, 0),
 		queue:   make(chan *Message, options.BufferSize),

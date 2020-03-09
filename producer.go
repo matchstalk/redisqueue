@@ -22,6 +22,8 @@ type ProducerOptions struct {
 	// RedisOptions is how you configure the underlying Redis connection. More
 	// info here: https://godoc.org/github.com/go-redis/redis#Options.
 	RedisOptions *RedisOptions
+	// RedisClient is first
+	RedisClient *redis.Client
 }
 
 // Producer adds a convenient wrapper around enqueuing messages that will be
@@ -45,14 +47,17 @@ func NewProducer() (*Producer, error) {
 
 // NewProducerWithOptions creates a Producer using custom ProducerOptions.
 func NewProducerWithOptions(options *ProducerOptions) (*Producer, error) {
-	r, err := newRedisClient(options.RedisOptions)
-	if err != nil {
-		return nil, err
+	var err error
+	if options.RedisClient == nil {
+		options.RedisClient, err = newRedisClient(options.RedisOptions)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &Producer{
 		options: options,
-		redis:   r,
+		redis:   options.RedisClient,
 	}, nil
 }
 
