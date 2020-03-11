@@ -6,6 +6,7 @@ require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/git-chglog/git-chglog v0.0.0-20190923122001-6050f20bcdb0
 	github.com/go-redis/redis v6.15.7+incompatible
+	github.com/go-redis/redis/v7 v7.2.0
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mattn/goveralls v0.0.5
